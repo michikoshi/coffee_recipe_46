@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コーヒー抽出レシピ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+        input, button {
+            margin-right: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>コーヒー抽出レシピ</h1>
+    <div class="input-group">
+        <label for="amount">抽出量 (ml):</label>
+        <input type="number" id="amount" min="1" value="200">
+    </div>
+    <div class="input-group">
+        <label>味:</label>
+        <button onclick="setTaste('バランス')">バランス</button>
+        <button onclick="setTaste('甘い')">甘い</button>
+        <button onclick="setTaste('すっきり')">すっきり</button>
+    </div>
+    <div class="input-group">
+        <label>濃さ:</label>
+        <button onclick="setDensity('濃い')">濃い</button>
+        <button onclick="setDensity('軽い')">軽い</button>
+        <button onclick="setDensity('薄い')">薄い</button>
+    </div>
+    <button onclick="generateRecipe()">レシピを生成</button>
+    <table id="recipeTable"></table>
+
+    <script>
+        let selectedTaste = 'バランス';
+        let selectedDensity = '濃い';
+
+        function setTaste(taste) {
+            selectedTaste = taste;
+        }
+
+        function setDensity(density) {
+            selectedDensity = density;
+        }
+
+        function generateRecipe() {
+            const amount = parseInt(document.getElementById('amount').value);
+            const w = (13 * amount) / 15;
+            const c = amount / 13;
+            const w1 = 0.4 * w;
+            const w2 = 0.6 * w;
+
+            let firstHalf = [];
+            let secondHalf = [];
+
+            // 前半テーブルの生成
+            if (selectedTaste === 'バランス') {
+                firstHalf = [
+                    ['0:00', w1 * 0.5],
+                    ['0:45', w1 * 0.5]
+                ];
+            } else if (selectedTaste === '甘い') {
+                firstHalf = [
+                    ['0:00', w1 * 0.42],
+                    ['0:45', w1 * 0.58]
+                ];
+            } else if (selectedTaste === 'すっきり') {
+                firstHalf = [
+                    ['0:00', w1 * 0.58],
+                    ['0:45', w1 * 0.42]
+                ];
+            }
+
+            // 後半テーブルの生成
+            if (selectedDensity === '濃い') {
+                secondHalf = [
+                    ['1:30', w2 / 3],
+                    ['2:15', w2 / 3],
+                    ['2:45', w2 / 3],
+                    ['3:30', '終了']
+                ];
+            } else if (selectedDensity === '軽い') {
+                secondHalf = [
+                    ['1:30', w2 / 2],
+                    ['2:30', w2 / 2],
+                    ['3:30', '終了']
+                ];
+            } else if (selectedDensity === '薄い') {
+                secondHalf = [
+                    ['1:30', w2],
+                    ['3:30', '終了']
+                ];
+            }
+
+            const fullTable = [...firstHalf, ...secondHalf];
+
+            let tableHTML = '<tr><th>時間</th><th>投湯量</th><th>合計量</th></tr>';
+            let total = 0;
+
+            fullTable.forEach(row => {
+                if (row[1] !== '終了') {
+                    total += row[1];
+                    tableHTML += `<tr><td>${row[0]}</td><td>${Math.round(row[1])}</td><td>${Math.round(total)}</td></tr>`;
+                } else {
+                    tableHTML += `<tr><td>${row[0]}</td><td colspan="2">終了</td></tr>`;
+                }
+            });
+
+            document.getElementById('recipeTable').innerHTML = tableHTML;
+        }
+    </script>
+</body>
+</html>
