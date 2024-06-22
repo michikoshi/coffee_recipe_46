@@ -16,6 +16,9 @@
         }
         .input-group {
             margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         label {
             display: inline-block;
@@ -25,7 +28,13 @@
             margin-right: 5px;
         }
         input[type="number"] {
-            width: 80px;
+            width: 60px;
+            text-align: center;
+        }
+        button {
+            font-size: 1.2em;
+            padding: 5px 10px;
+            margin: 0 5px;
         }
         table {
             width: 100%;
@@ -59,7 +68,9 @@
     <h1>コーヒー抽出レシピ</h1>
     <div class="input-group">
         <label for="amount">抽出量 (ml):</label>
-        <input type="number" id="amount" min="20" value="260" step="20">
+        <button onclick="changeAmount(-20)">-</button>
+        <input type="number" id="amount" min="20" value="260" step="20" readonly>
+        <button onclick="changeAmount(20)">+</button>
     </div>
     <div class="input-group">
         <label>味:</label>
@@ -88,6 +99,14 @@
     </div>
 
     <script>
+        function changeAmount(change) {
+            const amountInput = document.getElementById('amount');
+            let newValue = parseInt(amountInput.value) + change;
+            newValue = Math.max(20, newValue); // 最小値を20に設定
+            amountInput.value = newValue;
+            generateRecipe();
+        }
+
         function generateRecipe() {
             const amount = parseInt(document.getElementById('amount').value);
             const selectedTaste = document.querySelector('input[name="taste"]:checked').value;
@@ -170,8 +189,7 @@
             `;
         }
 
-        // 入力値やラジオボタンの変更を監視
-        document.getElementById('amount').addEventListener('input', generateRecipe);
+        // ラジオボタンの変更を監視
         document.querySelectorAll('input[name="taste"], input[name="density"]').forEach(radio => {
             radio.addEventListener('change', generateRecipe);
         });
