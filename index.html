@@ -179,11 +179,11 @@
                     if (currentTime >= rowTime && currentTime <= rowTime + 15) {
                         row.classList.add('highlight-time');
                         row.classList.remove('current-time');
-                        firstNonGreyRowFound = true;
+                        //firstNonGreyRowFound = true;
                     } else if (!firstNonGreyRowFound) {
-                        row.classList.add('current-time');
-                        row.classList.remove('highlight-time');
-                        firstNonGreyRowFound = true;
+                        //row.classList.add('current-time');
+                        //row.classList.remove('highlight-time');
+                        //firstNonGreyRowFound = true;
                     } else {
                         row.classList.remove('current-time', 'highlight-time');
                     }
