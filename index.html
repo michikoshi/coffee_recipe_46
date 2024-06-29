@@ -170,23 +170,16 @@
                 const timeCell = row.cells[0];
                 const [minutes, seconds] = timeCell.textContent.split(':').map(Number);
                 const rowTime = minutes * 60 + seconds;
-                
-                if (currentTime - 30 > rowTime) {
-                    row.classList.add('past-time');
-                    row.classList.remove('current-time', 'highlight-time');
-                } else {
+                if (currentTime >= rowTime && currentTime <= rowTime + 15) {
+                    row.classList.add('highlight-time');
                     row.classList.remove('past-time');
-                    if (currentTime >= rowTime && currentTime <= rowTime + 15) {
-                        row.classList.add('highlight-time');
-                        row.classList.remove('current-time');
-                        //firstNonGreyRowFound = true;
-                    } else if (!firstNonGreyRowFound) {
-                        //row.classList.add('current-time');
-                        //row.classList.remove('highlight-time');
-                        //firstNonGreyRowFound = true;
-                    } else {
-                        row.classList.remove('current-time', 'highlight-time');
-                    }
+                    //row.classList.remove('current-time');
+                } else if (currentTime > rowTime) {
+                    row.classList.add('past-time');
+                    row.classList.remove('highlight-time');
+                } else {
+                    row.classList.remove('highlight-time');
+                    row.classList.remove('past-time');
                 }
             });
         }
