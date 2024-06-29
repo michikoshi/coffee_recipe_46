@@ -62,6 +62,26 @@
         #additionalInfo {
             margin-top: 30px;
         }
+        #stopwatch {
+            font-size: 2em;
+            text-align: center;
+            margin: 20px 0;
+        }
+        #stopwatchControls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .past-time {
+            background-color: #f2f2f2;
+        }
+        .current-time {
+            background-color: #ffffcc;
+        }
+        .highlight-time {
+            background-color: #ffcc00;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -91,6 +111,11 @@
     </div>
     <h2>抽出レシピ</h2>
     <table id="recipeTable"></table>
+    <div id="stopwatch">00:00.0</div>
+    <div id="stopwatchControls">
+        <button onclick="startStopwatch()">スタート/ストップ</button>
+        <button onclick="resetStopwatch()">リセット</button>
+    </div>
     <div id="notice">
         <h3>注意事項:</h3>
         <ul>
@@ -99,6 +124,73 @@
     </div>
 
     <script>
+        let stopwatchInterval;
+        let stopwatchTime = 0;
+        let isRunning = false;
+
+        function startStopwatch() {
+            if (!isRunning) {
+                stopwatchInterval = setInterval(updateStopwatch, 100);
+                isRunning = true;
+            } else {
+                clearInterval(stopwatchInterval);
+                isRunning = false;
+            }
+        }
+
+        function resetStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchTime = 0;
+            isRunning = false;
+            updateStopwatchDisplay();
+            updateTableColors();
+        }
+
+        function updateStopwatch() {
+            stopwatchTime += 100;
+            updateStopwatchDisplay();
+            updateTableColors();
+        }
+
+        function updateStopwatchDisplay() {
+            const minutes = Math.floor(stopwatchTime / 60000);
+            const seconds = Math.floor((stopwatchTime % 60000) / 1000);
+            const tenths = Math.floor((stopwatchTime % 1000) / 100);
+            document.getElementById('stopwatch').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${tenths}`;
+        }
+
+        function updateTableColors() {
+            const rows = document.querySelectorAll('#recipeTable tr');
+            let firstNonGreyRowFound = false;
+            const currentTime = Math.floor(stopwatchTime / 1000);
+
+            rows.forEach((row, index) => {
+                if (index === 0) return; // Skip header row
+                const timeCell = row.cells[0];
+                const [minutes, seconds] = timeCell.textContent.split(':').map(Number);
+                const rowTime = minutes * 60 + seconds;
+                
+                if (currentTime - 30 > rowTime) {
+                    row.classList.add('past-time');
+                    row.classList.remove('current-time', 'highlight-time');
+                } else {
+                    row.classList.remove('past-time');
+                    if (currentTime >= rowTime && currentTime <= rowTime + 15) {
+                        row.classList.add('highlight-time');
+                        row.classList.remove('current-time');
+                        firstNonGreyRowFound = true;
+                    } else if (!firstNonGreyRowFound) {
+                        row.classList.add('current-time');
+                        row.classList.remove('highlight-time');
+                        firstNonGreyRowFound = true;
+                    } else {
+                        row.classList.remove('current-time', 'highlight-time');
+                    }
+                }
+            });
+        }
+
         function changeAmount(change) {
             const amountInput = document.getElementById('amount');
             let newValue = parseInt(amountInput.value) + change;
@@ -182,6 +274,7 @@
             });
 
             document.getElementById('recipeTable').innerHTML = tableHTML;
+            updateTableColors();
 
             // 選択結果の表示
             document.getElementById('selectionSummary').innerHTML = `
