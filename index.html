@@ -82,6 +82,12 @@
             background-color: #ffcc00;
             font-weight: bold;
         }
+        #currentAmount {
+            font-size: 2em;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -89,7 +95,7 @@
     <div class="input-group">
         <label for="amount">抽出量 (ml):</label>
         <button onclick="changeAmount(-20)">-</button>
-        <input type="number" id="amount" min="20" value="260" step="20" readonly>
+        <input type="number" id="amount" min="20" value="240" step="20" readonly>
         <button onclick="changeAmount(20)">+</button>
     </div>
     <div class="input-group">
@@ -112,16 +118,19 @@
     <h2>抽出レシピ</h2>
     <table id="recipeTable"></table>
     <div id="stopwatch">00:00.0</div>
+    <div id="currentAmount"></div>
     <div id="stopwatchControls">
         <button onclick="startStopwatch()">スタート/ストップ</button>
         <button onclick="resetStopwatch()">リセット</button>
     </div>
-    <div id="notice">
-        <h3>注意事項:</h3>
+    <details>
+        <summary>注意点</summary>
         <ul>
-            <li>中粗挽きの豆を使う</li>
+            <li> 中粗挽きが標準。濃くする場合は細挽き、薄くする場合は粗挽き </li>
+            <li> 浅煎り93度、中煎り88度、深煎り83度。ドリップアシストを使う場合は高めに熱湯で良い </li>
+            <li> ３分で抽出が完了しない場合は細すぎる、終わってる場合は荒すぎる </li>
         </ul>
-    </div>
+    </details>
 
     <script>
         let stopwatchInterval;
@@ -162,8 +171,8 @@
 
         function updateTableColors() {
             const rows = document.querySelectorAll('#recipeTable tr');
-            let firstNonGreyRowFound = false;
             const currentTime = Math.floor(stopwatchTime / 1000);
+            let highlightedAmount = null;
 
             rows.forEach((row, index) => {
                 if (index === 0) return; // Skip header row
@@ -173,7 +182,7 @@
                 if (currentTime >= rowTime && currentTime <= rowTime + 15) {
                     row.classList.add('highlight-time');
                     row.classList.remove('past-time');
-                    //row.classList.remove('current-time');
+                    highlightedAmount = row.cells[2].textContent; // 合計量を取得
                 } else if (currentTime > rowTime) {
                     row.classList.add('past-time');
                     row.classList.remove('highlight-time');
@@ -182,6 +191,15 @@
                     row.classList.remove('past-time');
                 }
             });
+
+            // 合計量の表示を更新
+            const currentAmountElement = document.getElementById('currentAmount');
+            if (highlightedAmount) {
+                currentAmountElement.textContent = highlightedAmount + ' ml';
+                currentAmountElement.style.display = 'block';
+            } else {
+                currentAmountElement.style.display = 'none';
+            }
         }
 
         function changeAmount(change) {
@@ -197,6 +215,9 @@
             const selectedTaste = document.querySelector('input[name="taste"]:checked').value;
             const selectedDensity = document.querySelector('input[name="density"]:checked').value;
 
+            // amount: 抽出量
+            // w: 投湯量
+            // c: 珈琲量
             const w = (15 * amount) / 13;
             const c = amount / 13;
             const w1 = 0.4 * w;
